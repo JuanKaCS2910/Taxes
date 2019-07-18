@@ -1,105 +1,54 @@
-﻿namespace Taxes.Controllers
+﻿using System;
+using System.Data;
+using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web.Mvc;
+using Taxes.Models;
+
+namespace Taxes.Controllers
 {
-    using System;
-    using System.Data;
-    using System.Data.Entity;
-    using System.Linq;
-    using System.Net;
-    using System.Web.Mvc;
-    using Taxes.Models;
-    public class PropertyTypesController : Controller
+    public class DepartmentsController : Controller
     {
         private TaxesContent db = new TaxesContent();
 
-        // GET: PropertyTypes
+        // GET: Departments
         public ActionResult Index()
         {
-            return View(db.PropertyTypes.OrderBy(pt => pt.Description).ToList());
+            return View(db.Departments.OrderBy(d => d.Name).ToList());
         }
 
-        // GET: PropertyTypes/Details/5
+        // GET: Departments/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            PropertyType propertyType = db.PropertyTypes.Find(id);
-            if (propertyType == null)
+            Department department = db.Departments.Find(id);
+            if (department == null)
             {
                 return HttpNotFound();
             }
-            return View(propertyType);
+            return View(department);
         }
 
-        // GET: PropertyTypes/Create
+        // GET: Departments/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: PropertyTypes/Create
+        // POST: Departments/Create
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "PropertyId,Description,Notes")] PropertyType propertyType)
+        public ActionResult Create([Bind(Include = "DeparmentId,Name")] Department department)
         {
             if (ModelState.IsValid)
             {
-                db.PropertyTypes.Add(propertyType);
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException != null && 
-                        ex.InnerException.InnerException != null && 
-                        ex.InnerException.InnerException.Message.Contains("Index"))
-                    {
-                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, ex.Message);
-                    }
-                    return View(propertyType);
-
-                }
-                
-                return RedirectToAction("Index");
-            }
-
-            return View(propertyType);
-        }
-
-        // GET: PropertyTypes/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            PropertyType propertyType = db.PropertyTypes.Find(id);
-            if (propertyType == null)
-            {
-                return HttpNotFound();
-            }
-            return View(propertyType);
-        }
-
-        // POST: PropertyTypes/Edit/5
-        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
-        // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "PropertyId,Description,Notes")] PropertyType propertyType)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(propertyType).State = EntityState.Modified;
-
+                db.Departments.Add(department);
                 try
                 {
                     db.SaveChanges();
@@ -116,37 +65,86 @@
                     {
                         ModelState.AddModelError(string.Empty, ex.Message);
                     }
-                    return View(propertyType);
-
+                    return View(department);
                 }
 
                 return RedirectToAction("Index");
             }
-            return View(propertyType);
+
+            return View(department);
         }
 
-        // GET: PropertyTypes/Delete/5
+        // GET: Departments/Edit/5
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            Department department = db.Departments.Find(id);
+            if (department == null)
+            {
+                return HttpNotFound();
+            }
+            return View(department);
+        }
+
+        // POST: Departments/Edit/5
+        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
+        // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "DeparmentId,Name")] Department department)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(department).State = EntityState.Modified;
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException != null &&
+                        ex.InnerException.InnerException != null &&
+                        ex.InnerException.InnerException.Message.Contains("Index"))
+                    {
+                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                    }
+                    return View(department);
+                }
+
+                return RedirectToAction("Index");
+            }
+            return View(department);
+        }
+
+        // GET: Departments/Delete/5
         public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            PropertyType propertyType = db.PropertyTypes.Find(id);
-            if (propertyType == null)
+            Department department = db.Departments.Find(id);
+            if (department == null)
             {
                 return HttpNotFound();
             }
-            return View(propertyType);
+            return View(department);
         }
 
-        // POST: PropertyTypes/Delete/5
+        // POST: Departments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            PropertyType propertyType = db.PropertyTypes.Find(id);
-            db.PropertyTypes.Remove(propertyType);
+            Department department = db.Departments.Find(id);
+            db.Departments.Remove(department);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
