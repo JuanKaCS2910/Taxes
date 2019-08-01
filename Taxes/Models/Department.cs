@@ -8,7 +8,7 @@
     public class Department
     {
         [Key]
-        public int DeparmentId { get; set; }
+        public int DepartmentId { get; set; }
 
         [Required(ErrorMessage = "The field {0} is required")]
         [Index("Deparment_Name_Index", IsUnique = true)]
@@ -17,6 +17,9 @@
         public string Name { get; set; }
 
         public virtual ICollection<Municipality> Municipalities { get; set; }
-        
+
+        public virtual ICollection<TaxPaer> TaxPaers { get; set; }
+        public virtual ICollection<Property> Properties { get; set; }
+
     }
 }

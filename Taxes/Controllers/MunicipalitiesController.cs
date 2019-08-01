@@ -7,6 +7,7 @@ using Taxes.Models;
 
 namespace Taxes.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MunicipalitiesController : Controller
     {
         private TaxesContent db = new TaxesContent();
@@ -36,7 +37,7 @@ namespace Taxes.Controllers
         // GET: Municipalities/Create
         public ActionResult Create()
         {
-            ViewBag.DeparmentId = new SelectList(db.Departments.OrderBy(d => d.Name), "DeparmentId", "Name");
+            ViewBag.DepartmentId = new SelectList(db.Departments.OrderBy(d => d.Name), "DepartmentId", "Name");
             return View();
         }
 
@@ -45,7 +46,7 @@ namespace Taxes.Controllers
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "MunicipalityId,DeparmentId,Name")] Municipality municipality)
+        public ActionResult Create([Bind(Include = "MunicipalityId,DepartmentId,Name")] Municipality municipality)
         {
             if (ModelState.IsValid)
             {
@@ -54,7 +55,7 @@ namespace Taxes.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.DeparmentId = new SelectList(db.Departments, "DeparmentId", "Name", municipality.DeparmentId);
+            ViewBag.DepartmentId = new SelectList(db.Departments, "DepartmentId", "Name", municipality.DepartmentId);
             return View(municipality);
         }
 
@@ -70,7 +71,7 @@ namespace Taxes.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.DeparmentId = new SelectList(db.Departments, "DeparmentId", "Name", municipality.DeparmentId);
+            ViewBag.DepartmentId = new SelectList(db.Departments, "DepartmentId", "Name", municipality.DepartmentId);
             return View(municipality);
         }
 
@@ -79,7 +80,7 @@ namespace Taxes.Controllers
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "MunicipalityId,DeparmentId,Name")] Municipality municipality)
+        public ActionResult Edit([Bind(Include = "MunicipalityId,DepartmentId,Name")] Municipality municipality)
         {
             if (ModelState.IsValid)
             {
@@ -87,7 +88,7 @@ namespace Taxes.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.DeparmentId = new SelectList(db.Departments, "DeparmentId", "Name", municipality.DeparmentId);
+            ViewBag.DepartmentId = new SelectList(db.Departments, "DepartmentId", "Name", municipality.DepartmentId);
             return View(municipality);
         }
 

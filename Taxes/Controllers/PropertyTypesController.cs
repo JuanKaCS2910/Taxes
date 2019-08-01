@@ -1,12 +1,12 @@
-﻿namespace Taxes.Controllers
+﻿using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web.Mvc;
+using Taxes.Models;
+
+namespace Taxes.Controllers
 {
-    using System;
-    using System.Data;
-    using System.Data.Entity;
-    using System.Linq;
-    using System.Net;
-    using System.Web.Mvc;
-    using Taxes.Models;
+    [Authorize(Roles = "Admin")]
     public class PropertyTypesController : Controller
     {
         private TaxesContent db = new TaxesContent();
@@ -14,7 +14,7 @@
         // GET: PropertyTypes
         public ActionResult Index()
         {
-            return View(db.PropertyTypes.OrderBy(pt => pt.Description).ToList());
+            return View(db.PropertyTypes.ToList());
         }
 
         // GET: PropertyTypes/Details/5
@@ -43,31 +43,12 @@
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "PropertyId,Description,Notes")] PropertyType propertyType)
+        public ActionResult Create([Bind(Include = "PropertyTypeId,Description,Notes")] PropertyType propertyType)
         {
             if (ModelState.IsValid)
             {
                 db.PropertyTypes.Add(propertyType);
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException != null && 
-                        ex.InnerException.InnerException != null && 
-                        ex.InnerException.InnerException.Message.Contains("Index"))
-                    {
-                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, ex.Message);
-                    }
-                    return View(propertyType);
-
-                }
-                
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -94,32 +75,12 @@
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "PropertyId,Description,Notes")] PropertyType propertyType)
+        public ActionResult Edit([Bind(Include = "PropertyTypeId,Description,Notes")] PropertyType propertyType)
         {
             if (ModelState.IsValid)
             {
                 db.Entry(propertyType).State = EntityState.Modified;
-
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    if (ex.InnerException != null &&
-                        ex.InnerException.InnerException != null &&
-                        ex.InnerException.InnerException.Message.Contains("Index"))
-                    {
-                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, ex.Message);
-                    }
-                    return View(propertyType);
-
-                }
-
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
             return View(propertyType);

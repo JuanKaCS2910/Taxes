@@ -1,4 +1,5 @@
 ﻿using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
 
 namespace Taxes.Models
 {
@@ -16,12 +17,22 @@ namespace Taxes.Models
             base.Dispose(disposing);    
         }
 
-        public System.Data.Entity.DbSet<PropertyType> PropertyTypes { get; set; }
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            //Preveer la eliminación en cascada
+            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+            //base.OnModelCreating(modelBuilder); 
+        }
 
-        public System.Data.Entity.DbSet<Department> Departments { get; set; }
+        public DbSet<PropertyType> PropertyTypes { get; set; }
 
-        public System.Data.Entity.DbSet<Municipality> Municipalities { get; set; }
+        public DbSet<Department> Departments { get; set; }
 
-        public System.Data.Entity.DbSet<Taxes.Models.DocumentType> DocumentTypes { get; set; }
+        public DbSet<Municipality> Municipalities { get; set; }
+
+        public DbSet<DocumentType> DocumentTypes { get; set; }
+
+        public DbSet<TaxPaer> TaxPaers { get; set; }
+        public DbSet<Property> Properties { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
@@ -26,18 +26,33 @@
                     <li>@Html.ActionLink("Acerca de", "About", "Home")</li>
                     <li>@Html.ActionLink("Contacto", "Contact", "Home")</li>
 
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin Options<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li>@Html.ActionLink("Departments", "Index", "Departments")</li>
-                            <li>@Html.ActionLink("Document Types", "Index", "DocumentTypes")</li>
-                            <li>@Html.ActionLink("Municipalidades", "Index", "Municipalities")</li>
-                            <li>@Html.ActionLink("Property Types", "Index", "PropertyTypes")</li>
-                        </ul>
-                    </li>
+                    @if (this.User.IsInRole("Admin"))
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin Options<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Departments", "Index", "Departments")</li>
+                                <li>@Html.ActionLink("Document Types", "Index", "DocumentTypes")</li>
+                                <li>@Html.ActionLink("Municipalidades", "Index", "Municipalities")</li>
+                                <li>@Html.ActionLink("Property Types", "Index", "PropertyTypes")</li>
+                                <li>@Html.ActionLink("Tax Paers", "Index", "TaxPaers")</li>
+                            </ul>
+                        </li>
+                    }
 
+                    @if (this.User.IsInRole("TaxPaer"))
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tax Paer Options<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("My Settings", "Index", "Departments")</li>
+                                <li>@Html.ActionLink("My Taxes", "Index", "DocumentTypes")</li>
+                                <li>@Html.ActionLink("My Tickets", "Index", "Municipalities")</li>
+                                
+                            </ul>
+                        </li>
+                    }
 
-                    
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>
