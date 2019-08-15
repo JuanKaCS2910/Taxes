@@ -1,5 +1,4 @@
-﻿
-namespace Taxes.Controllers
+﻿namespace Taxes.Controllers
 {
     using Clases;
     using Models;
@@ -10,11 +9,309 @@ namespace Taxes.Controllers
     using System.Web.Mvc;
 
 
-    [Authorize(Roles = "Admin")]
+
     public class TaxPaersController : Controller
     {
         private TaxesContent db = new TaxesContent();
 
+        #region MyTaxes
+
+        [Authorize(Roles = "TaxPaer")]
+        public ActionResult MyTaxes()
+        {
+            var taxpaer = db.TaxPaers
+                .Where(tp => tp.UserName == User.Identity.Name)
+                .FirstOrDefault();
+
+            decimal total = 0;
+
+            foreach (var property in taxpaer.Properties.ToList())
+            {
+                foreach (var taxProperty in property.TaxProperties.ToList())
+                {
+                    if (taxProperty.IsPay)
+                    {
+                        property.TaxProperties.Remove(taxProperty);
+                    }
+                    else
+                    {
+                        total += taxProperty.Value;
+                    }
+                }
+            }
+
+            var view = new TaxPaerWithTotal
+            {
+                TaxPaer = taxpaer,
+                Total = total,
+            };
+
+            return View(view);
+        }
+
+        #endregion
+
+        #region MyProperties
+
+        [Authorize(Roles = "TaxPaer")]
+        public ActionResult MyProperties()
+        {
+            var taxpaer = db.TaxPaers
+                .Where(tp => tp.UserName == User.Identity.Name)
+                .FirstOrDefault();
+
+            if (taxpaer != null)
+            {
+                
+                return View(taxpaer.Properties);
+            }
+
+            return RedirectToAction("Index", "Home");
+            
+        }
+
+        #endregion
+
+        #region Roles
+
+        [HttpPost]
+        public ActionResult MySettings(TaxPaer view)
+        {
+            if (ModelState.IsValid)
+            {
+                view.Department = db.Departments.Find(view.DepartmentId);
+                view.Municipality = db.Municipalities.Find(view.MunicipalityId);
+                db.Entry(view).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+
+                    if (ex.InnerException != null &&
+                         ex.InnerException.InnerException != null &&
+                         ex.InnerException.InnerException.Message.Contains("Index"))
+                    {
+                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                    }
+
+                    return View(view);
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.DepartmentId = new SelectList(db.Departments,
+               "DepartmentId", "Name", view.DepartmentId);
+            ViewBag.MunicipalityId = new SelectList(db.Municipalities
+                    .Where(m => m.DepartmentId == view.DepartmentId)
+                    .OrderBy(m => m.Name),
+                "MunicipalityId", "Name", view.MunicipalityId);
+
+            ViewBag.DocumentTypeId = new SelectList(db.DocumentTypes,
+                "DocumentTypeId", "Description", view.DocumentTypeId);
+
+            return View(view);
+        }
+
+        [Authorize(Roles = "TaxPaer")]
+        public ActionResult MySettings()
+        {
+
+            var taxpaer = db.TaxPaers
+                .Where(tp => tp.UserName == User.Identity.Name)
+                .FirstOrDefault();
+
+            if (taxpaer != null)
+            {
+                ViewBag.DepartmentId = new SelectList(db.Departments,
+               "DepartmentId", "Name", taxpaer.DepartmentId);
+                ViewBag.MunicipalityId = new SelectList(db.Municipalities
+                .Where(m => m.DepartmentId == taxpaer.DepartmentId)
+                .OrderBy(m => m.Name),
+                "MunicipalityId", "Name", taxpaer.MunicipalityId);
+
+                ViewBag.DocumentTypeId = new SelectList(db.DocumentTypes,
+                    "DocumentTypeId", "Description", taxpaer.DocumentTypeId);
+
+                return View(taxpaer);
+            }
+
+            return RedirectToAction("Index", "Home");
+
+        }
+
+        #endregion
+
+        #region Properties
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult DeleteProperty(int? propertyId)
+        {
+            if (propertyId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            var property = db.Properties.Find(propertyId);
+
+            if (property == null)
+            {
+                return HttpNotFound();
+            }
+
+            db.Properties.Remove(property);
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+
+            return RedirectToAction(string.Format("Details/{0}", property.TaxPaerId));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public ActionResult EditProperty(Property view)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(view).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+
+                    if (ex.InnerException != null &&
+                        ex.InnerException.InnerException != null &&
+                        ex.InnerException.InnerException.Message.Contains("Index"))
+                    {
+                        ModelState.AddModelError(string.Empty, "El campo ya se encuentra registrado");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                    }
+
+                    return View(view);
+                }
+
+                return RedirectToAction(string.Format("Details/{0}", view.TaxPaerId));
+            }
+
+            return View(view);
+
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public ActionResult EditProperty(int? propertyId, int? taxpaerId)
+        {
+            if (propertyId == null || taxpaerId == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var property = db.Properties.Find(propertyId);
+
+            if (property == null)
+            {
+                return HttpNotFound();
+            }
+
+            this.ReturnView(property, string.Empty);
+
+            return View(property);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AddProperty(Property view)
+        {
+            if (ModelState.IsValid)
+            {
+
+                db.Properties.Add(view);
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    //TODO: Catch error to improve the messages
+                    this.ReturnView(view, ex.Message);
+                    return View(view);
+                }
+
+                return RedirectToAction(string.Format("Details/{0}", view.TaxPaerId));
+            }
+
+            this.ReturnView(view, string.Empty);
+            return View(view);
+
+        }
+
+        [Authorize(Roles = "Admin")]
+        private void ReturnView(Property view, string error)
+        {
+            if (!string.IsNullOrEmpty(error))
+                ModelState.AddModelError(string.Empty, error);
+
+            ViewBag.DepartmentId = new SelectList(db.Departments,
+                "DepartmentId", "Name", view.DepartmentId);
+
+            ViewBag.MunicipalityId = new SelectList(db.Municipalities
+                .Where(m => m.DepartmentId == view.DepartmentId)
+                .OrderBy(m => m.Name),
+                "MunicipalityId", "Name", view.MunicipalityId);
+
+            ViewBag.PropertyTypeId = new SelectList(db.PropertyTypes,
+                "PropertyTypeId", "Description", view.PropertyTypeId);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult AddProperty(int? id)
+        {
+
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var view = new Property
+            {
+                TaxPaerId = id.Value,
+            };
+
+            ViewBag.DepartmentId = new SelectList(db.Departments,
+                "DepartmentId", "Name");
+
+            ViewBag.MunicipalityId = new SelectList(db.Municipalities
+                .Where(m => m.DepartmentId == db.Departments.FirstOrDefault().DepartmentId)
+                .OrderBy(m => m.Name),
+                "MunicipalityId", "Name");
+
+            ViewBag.PropertyTypeId = new SelectList(db.PropertyTypes,
+                "PropertyTypeId", "Description");
+
+            return View(view);
+        }
+
+        #endregion
+
+        [Authorize(Roles = "Admin")]
         // GET: TaxPaers
         public ActionResult Index()
         {
@@ -25,6 +322,7 @@ namespace Taxes.Controllers
             return View(taxPaers.ToList());
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: TaxPaers/Details/5
         public ActionResult Details(int? id)
         {
@@ -32,14 +330,37 @@ namespace Taxes.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            TaxPaer taxPaer = db.TaxPaers.Find(id);
-            if (taxPaer == null)
+
+            var taxPaers = db.TaxPaers.Find(id);
+
+            if (taxPaers == null)
             {
                 return HttpNotFound();
             }
-            return View(taxPaer);
+
+            var view = new TaxPaerView
+            {
+                TaxPaerId = taxPaers.TaxPaerId,
+                Department = taxPaers.Department,
+                DepartmentId = taxPaers.DepartmentId,
+                DocumentType = taxPaers.DocumentType,
+                DocumentTypeId = taxPaers.DocumentTypeId,
+                Municipality = taxPaers.Municipality,
+                MunicipalityId = taxPaers.MunicipalityId,
+                FirstName = taxPaers.FirstName,
+                LastName = taxPaers.LastName,
+                UserName = taxPaers.UserName,
+                Phone = taxPaers.Phone,
+                Address = taxPaers.Address,
+                Document = taxPaers.Document,
+                PropertyList = taxPaers.Properties.OrderBy(p => p.Department.Name).ToList()
+            };
+
+
+            return View(view);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: TaxPaers/Create
         public ActionResult Create()
         {
@@ -54,6 +375,7 @@ namespace Taxes.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: TaxPaers/Create
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -95,6 +417,7 @@ namespace Taxes.Controllers
             return View(taxPaer);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: TaxPaers/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -117,6 +440,7 @@ namespace Taxes.Controllers
             return View(taxPaer);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: TaxPaers/Edit/5
         // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
         // más información vea http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -140,6 +464,7 @@ namespace Taxes.Controllers
             return View(taxPaer);
         }
 
+        [Authorize(Roles = "Admin")]
         // GET: TaxPaers/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -155,6 +480,7 @@ namespace Taxes.Controllers
             return View(taxPaer);
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: TaxPaers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -166,7 +492,7 @@ namespace Taxes.Controllers
             return RedirectToAction("Index");
         }
 
-
+        //[Authorize(Roles = "Admin")]
         public JsonResult GetMunicipalities(int departmentId)
         {
             db.Configuration.ProxyCreationEnabled = false;

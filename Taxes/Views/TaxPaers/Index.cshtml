@@ -11,15 +11,11 @@
 </p>
 <table class="table">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Department.Name)
-        </th>
+        
         <th>
             @Html.DisplayNameFor(model => model.DocumentType.Description)
         </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Municipality.Name)
-        </th>
+        
         <th>
             @Html.DisplayNameFor(model => model.FirstName)
         </th>
@@ -32,26 +28,25 @@
         <th>
             @Html.DisplayNameFor(model => model.Phone)
         </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Address)
-        </th>
+        
         <th>
             @Html.DisplayNameFor(model => model.Document)
+        </th>
+        <th>
+            # Propiedades
         </th>
         <th></th>
     </tr>
 
 @foreach (var item in Model) {
     <tr>
-        <td>
+        @*<td>
             @Html.DisplayFor(modelItem => item.Department.Name)
-        </td>
+        </td>*@
         <td>
             @Html.DisplayFor(modelItem => item.DocumentType.Description)
         </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Municipality.Name)
-        </td>
+        
         <td>
             @Html.DisplayFor(modelItem => item.FirstName)
         </td>
@@ -64,11 +59,12 @@
         <td>
             @Html.DisplayFor(modelItem => item.Phone)
         </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Address)
-        </td>
+       
         <td>
             @Html.DisplayFor(modelItem => item.Document)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Properties.Count)
         </td>
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.TaxPaerId }, new { @class= "btn btn-warning" }) 

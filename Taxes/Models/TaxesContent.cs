@@ -34,5 +34,9 @@ namespace Taxes.Models
 
         public DbSet<TaxPaer> TaxPaers { get; set; }
         public DbSet<Property> Properties { get; set; }
+
+        public DbSet<Tax> Taxes { get; set; }
+
+        public DbSet<TaxProperty> TaxProperties { get; set; }
     }
 }
