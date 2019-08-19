@@ -1,13 +1,11 @@
-﻿using System;
-using System.Globalization;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
+using Taxes.Clases;
 using Taxes.Models;
 
 namespace Taxes.Controllers
@@ -156,7 +154,18 @@ namespace Taxes.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    SendEmail email = new SendEmail {
+                        Body = "Estimad@ <br/>" +
+                               "Nos complace dale la bienvenida como nuevo usuario en nuestro aplicativo. <br/>" +
+                               "<span>Se procedió al registro del usuario correctamente! </span> <br/><br/>" +
+                               "Saludos <br/><br/>" +
+                                "<a href='http://helptutoriales.wordpress.com/'>Visit HelpTutoriales</a>",
+                        To = model.Email,
+                        Subject = "Bienvenido a tu Cuenta"
+                    };
                     
+                    await Utilities.EnviarCorreo(email);
+
                     // Para obtener más información sobre cómo habilitar la confirmación de cuenta y el restablecimiento de contraseña, visite http://go.microsoft.com/fwlink/?LinkID=320771
                     // Enviar correo electrónico con este vínculo
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
@@ -171,6 +180,8 @@ namespace Taxes.Controllers
             // Si llegamos a este punto, es que se ha producido un error y volvemos a mostrar el formulario
             return View(model);
         }
+
+        
 
         //
         // GET: /Account/ConfirmEmail
@@ -203,6 +214,14 @@ namespace Taxes.Controllers
             if (ModelState.IsValid)
             {
                 var user = await UserManager.FindByNameAsync(model.Email);
+                if (user != null)
+                {
+                    await Utilities.PasswordRecovery(model.Email);
+                    return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                }
+
+                /*
+                var user = await UserManager.FindByNameAsync(model.Email);
                 if (user == null || !(await UserManager.IsEmailConfirmedAsync(user.Id)))
                 {
                     // No revelar que el usuario no existe o que no está confirmado
@@ -215,6 +234,7 @@ namespace Taxes.Controllers
                 // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
                 // await UserManager.SendEmailAsync(user.Id, "Restablecer contraseña", "Para restablecer la contraseña, haga clic <a href=\"" + callbackUrl + "\">aquí</a>");
                 // return RedirectToAction("ForgotPasswordConfirmation", "Account");
+                */
             }
 
             // Si llegamos a este punto, es que se ha producido un error y volvemos a mostrar el formulario
