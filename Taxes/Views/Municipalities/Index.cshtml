@@ -1,26 +1,85 @@
-﻿    @model IEnumerable<Taxes.Models.Municipality>
+﻿    @model Taxes.Models.MunicipalitiesView
 
 @{
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Municipalities</h2>
 
-<p>
+@using (Html.BeginForm())
+{
+    <table>
+        <tr>
+            <td>
+                @Html.LabelFor(model => model.Department, htmlAttributes: new { @class = "control-label col-md-2" })
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Department, new { htmlAttributes = new { @class = "form-control" } })
+            </td>
+            <td>
+                @Html.LabelFor(model => model.Municipality, htmlAttributes: new { @class = "control-label col-md-2" })
+            </td>
+            <td>
+                @Html.EditorFor(model => model.Municipality, new { htmlAttributes = new { @class = "form-control" } })
+            </td>
+            <td>
+                <input type="submit" value="Filter" class="btn btn-info" />
+                
+            </td>
+            <td>
+                @Html.ActionLink("Create New", "Create", new { }, new { @class = "btn btn-primary" })
+            </td>
+        </tr>
+    </table>
+}
+<br />
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Department)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Municipality)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Municipalities)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Department.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.MunicipalityId }, new { @class = "btn btn-warning" })
+                @Html.ActionLink("Details", "Details", new { id = item.MunicipalityId }, new { @class = "btn btn-info" })
+                @Html.ActionLink("Delete", "Delete", new { id = item.MunicipalityId }, new { @class = "btn btn-danger" })
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+@*<p>
     @Html.ActionLink("Create New", "Create" , new { }, new { @class="btn btn-primary"})
 </p>
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Department.Name)
+            @Html.DisplayNameFor(model => model.Department)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.Municipality)
         </th>
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
+@foreach (var item in Model.Municipalities) {
     <tr>
         <td>
             @Html.DisplayFor(modelItem => item.Department.Name)
@@ -36,4 +95,4 @@
     </tr>
 }
 
-</table>
+</table>*@

@@ -2,12 +2,13 @@
 {
     using Clases;
     using Models;
+    using PagedList;
+
     using System;
     using System.Data.Entity;
     using System.Linq;
     using System.Net;
     using System.Web.Mvc;
-
 
 
     public class TaxPaersController : Controller
@@ -313,13 +314,21 @@
 
         [Authorize(Roles = "Admin")]
         // GET: TaxPaers
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
+            page = (page ?? 1);
+
             var taxPaers = db.TaxPaers
+                            .OrderBy(tp => tp.LastName)
+                            .ThenBy(tp => tp.FirstName);
+
+            /*var taxPaers = db.TaxPaers
                 .Include(t => t.Department)
                 .Include(t => t.DocumentType)
                 .Include(t => t.Municipality);
-            return View(taxPaers.ToList());
+            return View(taxPaers.ToList());*/
+
+            return View(taxPaers.ToPagedList((int)page, 1));
         }
 
         [Authorize(Roles = "Admin")]
