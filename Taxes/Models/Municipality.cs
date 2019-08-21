@@ -18,5 +18,6 @@
 
         public virtual ICollection<TaxPaer> TaxPaers { get; set; }
         public virtual ICollection<Property> Properties { get; set; }
+        public virtual ICollection<Employee> Employees { get; set; }
     }
 }

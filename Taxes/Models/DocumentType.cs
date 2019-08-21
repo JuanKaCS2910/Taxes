@@ -16,5 +16,6 @@ namespace Taxes.Models
         public string Description { get; set; }
 
         public virtual ICollection<TaxPaer> TaxPaers { get; set; }
+        public virtual ICollection<Employee> Employees { get; set; }
     }
 }

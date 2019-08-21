@@ -22,6 +22,12 @@ namespace Taxes.Models
             //Preveer la eliminación en cascada
             modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
             //base.OnModelCreating(modelBuilder); 
+
+            //TODO: Create a Foreign Key.
+            modelBuilder.Entity<Employee>()
+                .HasOptional(x => x.Boss)
+                .WithMany(x => x.Employees)
+                .HasForeignKey(x => x.BossId);
         }
 
         public DbSet<PropertyType> PropertyTypes { get; set; }
@@ -38,5 +44,6 @@ namespace Taxes.Models
         public DbSet<Tax> Taxes { get; set; }
 
         public DbSet<TaxProperty> TaxProperties { get; set; }
+        public DbSet<Employee> Employees { get; set; }
     }
 }
